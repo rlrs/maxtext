@@ -157,5 +157,6 @@ class TokenizeOp:
 
   def __call__(self, features: Features) -> Features:
     for k in self.data_keys:
+      print(features)
       features[k] = self.sp_tokenizer.tokenize(features[k])
     return features

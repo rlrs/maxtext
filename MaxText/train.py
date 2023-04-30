@@ -286,7 +286,7 @@ def train_loop(config, state=None):
       learning_rate=config.learning_rate, warmup_steps=config.warmup_steps
   )
 
-  tx = optax.adam(
+  tx = optax.adamw(
       max_utils.create_learning_rate_schedule(
           learning_rate=config.learning_rate, warmup_steps=config.warmup_steps
       ),

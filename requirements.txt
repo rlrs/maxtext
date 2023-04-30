@@ -1,4 +1,5 @@
 jax[tpu]==0.4.6
+#jax[cuda11_pip]==0.4.8
 orbax==0.1.6
 absl-py
 argparse
@@ -18,3 +19,5 @@ tensorflow-datasets
 tensorboard-plugin-profile
 tensorflow-text==2.12.0rc0
 tensorboardx
+zstandard
+jsonlines

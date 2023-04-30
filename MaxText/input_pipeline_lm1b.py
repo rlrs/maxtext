@@ -14,23 +14,21 @@
  limitations under the License.
  """
 
-"""Input pipeline for Danish-Text dataset."""
+"""Input pipeline for a LM1B dataset."""
 
 import os
-import io
 from typing import Optional
 import functools
 
 import ml_collections
 import tensorflow as tf
+import tensorflow_datasets as tfds
 import jax
 from jax.experimental.pjit import PartitionSpec as P
 
 import tokenizer
 import multihost_dataloading
 import sequence_packing
-import zstandard as zstd
-import jsonlines
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
@@ -170,23 +168,25 @@ def get_datasets(
   read_config = None,
 ):
   """Load and return dataset of batched examples for use during training."""
-  def generator():
-    with open("/mnt/data_6tb/danish-text/train.jsonl.zst", "rb") as fh:
-      dctx = zstd.ZstdDecompressor()
-      with dctx.stream_reader(fh) as reader:
-        with io.TextIOWrapper(reader, encoding="utf-8") as text_reader:
-          with jsonlines.Reader(text_reader) as jsonl_reader:
-            for obj in jsonl_reader:
-              yield {"text": obj["text"]}
   # Training dataset.
-  train_ds = tf.data.Dataset.from_generator(generator, {"text": tf.string}, {"text": tf.TensorShape([])})
-  eval_ds = train_ds.take(1000)
-  train_ds = train_ds.skip(1000)
+  train_ds_builder = tfds.builder(config.dataset_name)
+  # train_data = get_raw_dataset(train_ds_builder, 'train')
+  train_ds = train_ds_builder.as_dataset(split='train',
+                                           read_config = read_config,
+                                           shuffle_files=False)
   # shard the dataset as soon as it is loaded
   train_ds = train_ds.shard(num_shards = jax.process_count(), index = jax.process_index())
   train_ds = normalize_features(train_ds)
 
   # Evaluation dataset.
+  if config.eval_dataset_name:
+    eval_ds_builder = tfds.builder(config.eval_dataset_name)
+  else:
+    eval_ds_builder = train_ds_builder
+  # eval_data = get_raw_dataset(eval_ds_builder, config.eval_split)
+  eval_ds = eval_ds_builder.as_dataset(split=config.eval_split,
+                                          read_config = read_config,
+                                          shuffle_files=False)
   eval_ds = eval_ds.shard(num_shards = jax.process_count(), index = jax.process_index())
   eval_ds = normalize_features(eval_ds)
 
@@ -198,7 +198,7 @@ def preprocess_dataset(config: ml_collections.ConfigDict,
                         vocab_path: Optional[str] = None,):
   """Pre-process the dataset and return iterators"""
   if vocab_path is None:
-    vocab_path = os.path.expanduser('~/dpt1_spiece.model')
+    vocab_path = os.path.expanduser('~/lm1b_sentencepiece_model')
 
   # Train or load tokenizer
   sp_tokenizer = tokenizer.load_or_train_tokenizer(
