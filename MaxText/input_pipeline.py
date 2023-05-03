@@ -87,7 +87,7 @@ def normalize_features(ds):
 
 
 def preprocessing_pipeline(
-  dataset,
+  dataset: tf.data.Dataset,
   batch_size: int,
   global_mesh,
   shuffle: bool,
@@ -170,18 +170,21 @@ def get_datasets(
   read_config = None,
 ):
   """Load and return dataset of batched examples for use during training."""
-  def generator():
-    with open("/mnt/data_6tb/danish-text/train.jsonl.zst", "rb") as fh:
-      dctx = zstd.ZstdDecompressor()
-      with dctx.stream_reader(fh) as reader:
-        with io.TextIOWrapper(reader, encoding="utf-8") as text_reader:
-          with jsonlines.Reader(text_reader) as jsonl_reader:
-            for obj in jsonl_reader:
-              yield {"text": obj["text"]}
+  def make_generator(path):
+    def generator():
+      with open(path, "rb") as fh:
+        dctx = zstd.ZstdDecompressor()
+        with dctx.stream_reader(fh) as reader:
+          with io.TextIOWrapper(reader, encoding="utf-8") as text_reader:
+            with jsonlines.Reader(text_reader) as jsonl_reader:
+              for obj in jsonl_reader:
+                yield {"text": obj["text"]}
+    return generator
   # Training dataset.
-  train_ds = tf.data.Dataset.from_generator(generator, {"text": tf.string}, {"text": tf.TensorShape([])})
-  eval_ds = train_ds.take(1000)
-  train_ds = train_ds.skip(1000)
+  train_ds = tf.data.Dataset.from_generator(make_generator("/mnt/data_6tb/danish-text/train.jsonl.zst"), 
+                                            output_signature={"text": tf.TensorSpec(shape=(), dtype=tf.string)})
+  eval_ds = tf.data.Dataset.from_generator(make_generator("/mnt/data_6tb/danish-text/holdout.jsonl.zst"), 
+                                            output_signature={"text": tf.TensorSpec(shape=(), dtype=tf.string)})
   # shard the dataset as soon as it is loaded
   train_ds = train_ds.shard(num_shards = jax.process_count(), index = jax.process_index())
   train_ds = normalize_features(train_ds)
@@ -198,7 +201,7 @@ def preprocess_dataset(config: ml_collections.ConfigDict,
                         vocab_path: Optional[str] = None,):
   """Pre-process the dataset and return iterators"""
   if vocab_path is None:
-    vocab_path = os.path.expanduser('~/dpt1_spiece.model')
+    vocab_path = os.path.expanduser('~/dpt1-spiece.model')
 
   # Train or load tokenizer
   sp_tokenizer = tokenizer.load_or_train_tokenizer(
@@ -222,15 +225,15 @@ def preprocess_dataset(config: ml_collections.ConfigDict,
 
   def filter_keys(record):
     return {'inputs': record['inputs'], 'targets': record['targets']}
-  train_ds = train_ds.map(filter_keys,num_parallel_calls=tf.data.AUTOTUNE)
-  eval_ds = eval_ds.map(filter_keys,num_parallel_calls=tf.data.AUTOTUNE)
+  train_ds = train_ds.map(filter_keys, num_parallel_calls=tf.data.AUTOTUNE)
+  eval_ds = eval_ds.map(filter_keys, num_parallel_calls=tf.data.AUTOTUNE)
 
   train_iter = preprocessing_pipeline(
       train_ds,
       batch_size,
       global_mesh,
       shuffle=True,
-      num_epochs=None,
+      num_epochs=1,
       pack_examples=True,
       max_length=config.max_target_length,
       shift=True,
