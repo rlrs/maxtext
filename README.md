@@ -273,3 +273,8 @@ bash unit_test_and_lint.sh
 ```
 
 The full suite of end-to-end tests is in `end_to_end/`. We run them with a nightly cadence.
+
+# Sampling from a trained model
+```bash
+python MaxText/sample.py MaxText/configs/base.yml run_name=<run name> prompt=<prompt>
+```
