@@ -94,7 +94,7 @@ learning_rate: 2.e-4
 warmup_steps: 5_000
 
 # Maximum length cutoff for training examples.
-max_target_length: 1024
+max_target_length: 512
 # Maximum length cutoff for held-out evaluation examples.
 max_eval_target_length: 512
 
