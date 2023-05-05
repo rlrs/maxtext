@@ -185,7 +185,7 @@ def rsqrt_schedule(init_value: float, shift: int = 0):
     return schedule
 
 
-def create_learning_rate_schedule(learning_rate: float, warmup_steps: int):
+def create_learning_rate_schedule(learning_rate: float, warmup_steps: int, total_steps: int):
     """Creates a rsqrt schedule with linear warmup."""
     return optax.join_schedules(
         [
@@ -194,7 +194,7 @@ def create_learning_rate_schedule(learning_rate: float, warmup_steps: int):
             ),
             optax.cosine_decay_schedule(
                 init_value=learning_rate,
-                decay_steps=100000,
+                decay_steps=total_steps - warmup_steps,
             ),
         ],
         boundaries=[warmup_steps],
