@@ -29,9 +29,9 @@ metrics_file: "metrics.log" # for testing, local file that stores scalar metrics
 dtype: "bfloat16"
 scale: 1
 base_emb_dim: 2048
-base_num_heads: 8
+base_num_heads: 12
 base_mlp_dim: 8192
-base_num_decoder_layers: 16
+base_num_decoder_layers: 22
 head_dim: 256
 # activation functions are .
 mlp_activations: ["relu"]
@@ -80,12 +80,12 @@ vocab_relative_path: "dpt1-spiece.model"  # Assumes we're allowed
 dataset_name: 'danish-text'
 eval_dataset_name: ''
 #eval_split: 'validation'
-per_device_batch_size: 16
-eval_per_device_batch_size: 8
+per_device_batch_size: 4
+eval_per_device_batch_size: 4
 max_corpus_chars: 10_000_000
 
 # Training loop
-steps: 100_001
+steps: 300_001 # 8 devices * 4 batch * 512 tokens * 300k steps = 8B tokens
 log_period: 5_000
 save_period: 5_000
 #learning_rate: 3.e-5
