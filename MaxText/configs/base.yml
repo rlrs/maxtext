@@ -45,7 +45,7 @@ param_scan_axis: 1
 record_internal_nn_metrics: 0
 
 # Output directory
-base_output_directory: "/tmp/maxtext"
+base_output_directory: "gs://pdt-1"
 
 # Parallelism
 mesh_axes: ['data', 'fsdp', 'tensor']
@@ -81,15 +81,17 @@ dataset_name: 'danish-text'
 eval_dataset_name: ''
 #eval_split: 'validation'
 per_device_batch_size: 32
-eval_per_device_batch_size: 0
+eval_per_device_batch_size: 8
 max_corpus_chars: 10_000_000
 
 # Training loop
-steps: 100_001
-log_period: 5_000
-save_period: 5_000
-learning_rate: 3.e-5
-warmup_steps: 15_000
+steps: 22_001
+log_period: 2_000
+save_period: 2_000
+#learning_rate: 3.e-5
+#warmup_steps: 8_000
+learning_rate: 5.e-4
+warmup_steps: 2_000
 
 # Maximum length cutoff for training examples.
 max_target_length: 1024
@@ -101,10 +103,10 @@ max_predict_length: 50
 # Sampling temperature for language model inference.
 sampling_temperature: 0.6
 # Top k cutoff for logit sampling. If 0 then no top-k cutoff is used.
-sampling_top_k: 20
+sampling_top_k: 100
 eos_id: 2  # sentencepiece default
 # Prompt for language model sampling.
-prompt: "I love to "
+prompt: "5 + 5 = "
 
 enable_profiler: False
 enable_checkpointing: True

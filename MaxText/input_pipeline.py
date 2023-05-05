@@ -172,7 +172,7 @@ def get_datasets(
   """Load and return dataset of batched examples for use during training."""
   def make_generator(path):
     def generator():
-      with open(path, "rb") as fh:
+      with tf.io.gfile.GFile(path, "rb") as fh:
         dctx = zstd.ZstdDecompressor()
         with dctx.stream_reader(fh) as reader:
           with io.TextIOWrapper(reader, encoding="utf-8") as text_reader:
@@ -181,9 +181,9 @@ def get_datasets(
                 yield {"text": obj["text"]}
     return generator
   # Training dataset.
-  train_ds = tf.data.Dataset.from_generator(make_generator("/mnt/data_6tb/danish-text/train.jsonl.zst"), 
+  train_ds = tf.data.Dataset.from_generator(make_generator("gs://danish-text/train.jsonl.zst"), 
                                             output_signature={"text": tf.TensorSpec(shape=(), dtype=tf.string)})
-  eval_ds = tf.data.Dataset.from_generator(make_generator("/mnt/data_6tb/danish-text/holdout.jsonl.zst"), 
+  eval_ds = tf.data.Dataset.from_generator(make_generator("gs://danish-text/holdout.jsonl.zst"), 
                                             output_signature={"text": tf.TensorSpec(shape=(), dtype=tf.string)})
   # shard the dataset as soon as it is loaded
   train_ds = train_ds.shard(num_shards = jax.process_count(), index = jax.process_index())
