@@ -194,7 +194,7 @@ def create_learning_rate_schedule(learning_rate: float, warmup_steps: int):
             ),
             optax.cosine_decay_schedule(
                 init_value=learning_rate,
-                decay_steps=20000,
+                decay_steps=100000,
             ),
         ],
         boundaries=[warmup_steps],

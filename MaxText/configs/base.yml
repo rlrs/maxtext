@@ -28,10 +28,10 @@ metrics_file: "metrics.log" # for testing, local file that stores scalar metrics
 # Activation dtypes.
 dtype: "bfloat16"
 scale: 1
-base_emb_dim: 1024
+base_emb_dim: 2048
 base_num_heads: 8
-base_mlp_dim: 2048
-base_num_decoder_layers: 11
+base_mlp_dim: 8192
+base_num_decoder_layers: 16
 head_dim: 256
 # activation functions are .
 mlp_activations: ["relu"]
@@ -68,7 +68,7 @@ dcn_data_parallelism: 1
 dcn_fsdp_parallelism: 1
 dcn_tensor_parallelism: 1
 ici_data_parallelism: 1
-ici_fsdp_parallelism: 1
+ici_fsdp_parallelism: 8
 ici_tensor_parallelism: 1
 
 
@@ -80,18 +80,18 @@ vocab_relative_path: "dpt1-spiece.model"  # Assumes we're allowed
 dataset_name: 'danish-text'
 eval_dataset_name: ''
 #eval_split: 'validation'
-per_device_batch_size: 32
+per_device_batch_size: 16
 eval_per_device_batch_size: 8
 max_corpus_chars: 10_000_000
 
 # Training loop
-steps: 22_001
-log_period: 2_000
-save_period: 2_000
+steps: 100_001
+log_period: 5_000
+save_period: 5_000
 #learning_rate: 3.e-5
 #warmup_steps: 8_000
-learning_rate: 5.e-4
-warmup_steps: 2_000
+learning_rate: 2.e-4
+warmup_steps: 5_000
 
 # Maximum length cutoff for training examples.
 max_target_length: 1024
