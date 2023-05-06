@@ -181,7 +181,7 @@ def get_datasets(
                 yield {"text": obj["text"]}
     return generator
   # Training dataset.
-  train_ds = tf.data.Dataset.from_generator(make_generator("gs://danish-text/train.jsonl.zst"), 
+  train_ds = tf.data.Dataset.from_generator(make_generator(os.path.join(config.dataset_path, "train.jsonl.zst")), 
                                             output_signature={"text": tf.TensorSpec(shape=(), dtype=tf.string)})
   eval_ds = tf.data.Dataset.from_generator(make_generator("gs://danish-text/holdout.jsonl.zst"), 
                                             output_signature={"text": tf.TensorSpec(shape=(), dtype=tf.string)})

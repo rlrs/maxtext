@@ -26,13 +26,13 @@ metrics_file: "metrics.log" # for testing, local file that stores scalar metrics
 # Activation dtypes.
 dtype: "bfloat16"
 scale: 1
-base_emb_dim: 2048
-base_num_heads: 12
-base_mlp_dim: 8192
-base_num_decoder_layers: 22
+base_emb_dim: 2560
+base_num_heads: 32
+base_mlp_dim: 10240
+base_num_decoder_layers: 32
 head_dim: 256
 # activation functions are .
-mlp_activations: ["relu"]
+mlp_activations: ["gelu"]
 dropout_rate: 0
 logits_via_embedding: True  # NOTE: this is True just for testing.
 # minimal, full, or none
@@ -62,17 +62,17 @@ logical_axis_rules: [
                     ]
 data_sharding: [['data', 'fsdp', 'tensor']]
 
-dcn_data_parallelism: 1
+dcn_data_parallelism: 5  # 5 nodes
 dcn_fsdp_parallelism: 1
 dcn_tensor_parallelism: 1
 ici_data_parallelism: 1
-ici_fsdp_parallelism: 8
+ici_fsdp_parallelism: 8  # 8 cores per node
 ici_tensor_parallelism: 1
 
 
 # Dataset
 # Replace with your path given as argument in download_dataset.sh
-dataset_path: "gs://danish-text/"
+dataset_path: "gs://pdt-1/"
 vocab_size: 32_768 # powers of 2 for sharding
 vocab_relative_path: "dpt1-spiece.model"  # Assumes we're allowed
 dataset_name: 'danish-text'
@@ -83,16 +83,14 @@ eval_per_device_batch_size: 4
 max_corpus_chars: 10_000_000
 
 # Training loop
-steps: 300_001 # 8 devices * 4 batch * 512 tokens * 300k steps = 8B tokens
-log_period: 5_000
-save_period: 5_000
-#learning_rate: 3.e-5
-#warmup_steps: 8_000
-learning_rate: 2.e-4
+steps: 200_001 # 8 cores * 5 nodes * 4 batch * 1024 tokens * 300k steps = 32.77B tokens
+log_period: 1_000
+save_period: 1_000
+learning_rate: 1.e-4
 warmup_steps: 5_000
 
 # Maximum length cutoff for training examples.
-max_target_length: 512
+max_target_length: 1024
 # Maximum length cutoff for held-out evaluation examples.
 max_eval_target_length: 512
 
