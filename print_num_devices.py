@@ -24,7 +24,7 @@ def get_coordinator_ip():
 
 #port = multihost_utils.broadcast_one_to_all(jax.numpy.array(portpicker.pick_unused_port()))
 #coordinator_address = get_coordinator_ip() + ':' + str(port)
-coordinator_address = " 10.128.0.15:23583"
+coordinator_address = "10.128.0.15:23583"
 jax.distributed.initialize(coordinator_address=coordinator_address,
                             num_processes=args.process_count,
                             process_id=args.process_index)
