@@ -2,6 +2,12 @@ import jax
 import socket
 from jax.experimental import multihost_utils
 import portpicker
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--process_count', type=int)
+parser.add_argument('--process_index', type=int)
+args = parser.parse_args()
 
 def gen_local_ip():
     hostname = socket.gethostname()
@@ -19,8 +25,8 @@ def get_coordinator_ip():
 port = multihost_utils.broadcast_one_to_all(jax.numpy.array(portpicker.pick_unused_port()))
 coordinator_address = get_coordinator_ip() + ':' + str(port)
 jax.distributed.initialize(coordinator_address=coordinator_address,
-                            num_processes=jax.process_count(),
-                            process_id=jax.process_index())
+                            num_processes=args.process_count,
+                            process_id=args.process_index)
 
 print("jax.process_index():", jax.process_index())
 print("jax.process_count():", jax.process_count())
