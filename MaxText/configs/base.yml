@@ -26,10 +26,10 @@ metrics_file: "metrics.log" # for testing, local file that stores scalar metrics
 # Activation dtypes.
 dtype: "bfloat16"
 scale: 1
-base_emb_dim: 2560
-base_num_heads: 32
-base_mlp_dim: 10240
-base_num_decoder_layers: 32
+base_emb_dim: 1024
+base_num_heads: 16
+base_mlp_dim: 4096
+base_num_decoder_layers: 14
 head_dim: 256
 # activation functions are .
 mlp_activations: ["gelu"]
@@ -43,7 +43,7 @@ param_scan_axis: 1
 record_internal_nn_metrics: 0
 
 # Output directory
-base_output_directory: "gs://pdt-1"
+base_output_directory: "gs://dpt-1"
 
 # Parallelism
 mesh_axes: ['data', 'fsdp', 'tensor']
@@ -62,7 +62,7 @@ logical_axis_rules: [
                     ]
 data_sharding: [['data', 'fsdp', 'tensor']]
 
-dcn_data_parallelism: 5  # 5 nodes
+dcn_data_parallelism: 1
 dcn_fsdp_parallelism: 1
 dcn_tensor_parallelism: 1
 ici_data_parallelism: 1
@@ -72,20 +72,20 @@ ici_tensor_parallelism: 1
 
 # Dataset
 # Replace with your path given as argument in download_dataset.sh
-dataset_path: "gs://pdt-1/"
+dataset_path: "gs://dpt-1/"
 vocab_size: 32_768 # powers of 2 for sharding
 vocab_relative_path: "dpt1-spiece.model"  # Assumes we're allowed
 dataset_name: 'danish-text'
 eval_dataset_name: ''
 #eval_split: 'validation'
-per_device_batch_size: 4
-eval_per_device_batch_size: 4
+per_device_batch_size: 8
+eval_per_device_batch_size: 8
 max_corpus_chars: 10_000_000
 
 # Training loop
-steps: 200_001 # 8 cores * 5 nodes * 4 batch * 1024 tokens * 300k steps = 32.77B tokens
-log_period: 1_000
-save_period: 1_000
+steps: 800_001 # 8 cores * 1 nodes * 8 batch * 1024 tokens * 800k steps = 52.4B tokens
+log_period: 20_000
+save_period: 20_000
 learning_rate: 1.e-4
 warmup_steps: 5_000
 
