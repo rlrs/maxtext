@@ -1,5 +1,3 @@
-#jax[cuda11_pip]
-jax[tpu]
 orbax-checkpoint
 absl-py
 argparse
